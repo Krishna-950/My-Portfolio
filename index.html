@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M. Sai Krishna — Mechatronics &amp; Industrial Automation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B0D0E;
+  --panel:#15181A;
+  --panel2:#1B1F21;
+  --paper:#ECE9E2;
+  --paper-dim:#A8A6A0;
+  --amber:#E8A33D;
+  --amber-dim:#8a662a;
+  --cyan:#3F7E8C;
+  --cyan-dim:#264c54;
+  --line: rgba(236,233,226,0.09);
+  --line-strong: rgba(236,233,226,0.18);
+  font-size:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:'Inter',sans-serif;
+  overflow-x:hidden;
+  position:relative;
+}
+::selection{background:var(--amber);color:var(--ink);}
+
+/* ---------- Blueprint grid backdrop ---------- */
+.blueprint-bg{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:48px 48px;
+  opacity:0.5;
+}
+.blueprint-bg::after{
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(circle at 50% 0%, rgba(63,126,140,0.10), transparent 60%);
+}
+
+/* ---------- Industrial motif layer ---------- */
+.industrial-bg{
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+.industrial-bg svg{
+  position:absolute; opacity:0.16; stroke:var(--cyan); fill:none;
+}
+.industrial-bg .amber{stroke:var(--amber);}
+.i-gear-1{top:6%; right:6%; width:220px; animation:spin-slow 60s linear infinite;}
+.i-gear-2{top:62%; left:3%; width:140px; animation:spin-slow-rev 50s linear infinite;}
+.i-gear-3{bottom:4%; right:18%; width:90px; animation:spin-slow 40s linear infinite;}
+.i-circuit{top:24%; left:8%; width:340px; opacity:0.12;}
+.i-antenna{top:8%; left:42%; width:200px; opacity:0.14;}
+.i-antenna .wave{animation:pulse-wave 3.4s ease-out infinite;}
+.i-antenna .wave2{animation-delay:1.1s;}
+.i-antenna .wave3{animation-delay:2.2s;}
+.i-robotarm{bottom:8%; left:14%; width:260px; opacity:0.13;}
+.i-cnc{top:46%; right:4%; width:180px; opacity:0.12;}
+.i-conveyor{bottom:18%; right:30%; width:280px; opacity:0.1;}
+.i-plcgrid{top:78%; left:46%; width:160px; opacity:0.12;}
+@keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes spin-slow-rev{from{transform:rotate(360deg);}to{transform:rotate(0deg);}}
+@keyframes pulse-wave{0%{opacity:0; transform:scale(0.7);}40%{opacity:.9;}100%{opacity:0; transform:scale(1.5);}}
+@media(max-width:900px){
+  .i-circuit,.i-robotarm,.i-conveyor,.i-gear-2{display:none;}
+}
+
+/* ---------- Scroll progress / torque gauge ---------- */
+.gauge{
+  position:fixed; top:0; left:0; height:3px; width:0%;
+  background:linear-gradient(90deg,var(--cyan),var(--amber));
+  z-index:1000; transition:width .08s linear;
+  box-shadow:0 0 12px var(--amber);
+}
+.gauge-label{
+  position:fixed; top:14px; right:18px; z-index:999;
+  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.08em;
+  color:var(--paper-dim); display:flex; align-items:center; gap:8px;
+}
+.gauge-label .dot{width:6px;height:6px;border-radius:50%;background:var(--amber); box-shadow:0 0 8px var(--amber); animation:pulse 1.6s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ---------- Nav ---------- */
+nav{
+  position:fixed; top:0; left:0; right:0; z-index:900;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:20px 5vw;
+  backdrop-filter:blur(10px);
+  background:linear-gradient(180deg, rgba(11,13,14,0.85), rgba(11,13,14,0));
+  font-family:'JetBrains Mono',monospace;
+}
+.logo{font-family:'Oswald',sans-serif; font-weight:700; font-size:1.1rem; letter-spacing:.04em; display:flex; align-items:center; gap:10px;}
+.logo .tag{font-family:'JetBrains Mono'; font-size:.62rem; color:var(--amber); border:1px solid var(--amber-dim); padding:2px 6px; border-radius:2px; letter-spacing:.1em;}
+.navlinks{display:flex; gap:28px; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;}
+.navlinks a{color:var(--paper-dim); text-decoration:none; position:relative; transition:color .25s;}
+.navlinks a::after{content:'';position:absolute;left:0;bottom:-6px;width:0;height:1px;background:var(--amber);transition:width .25s;}
+.navlinks a:hover{color:var(--paper);}
+.navlinks a:hover::after{width:100%;}
+@media(max-width:760px){.navlinks{display:none;}}
+
+/* ---------- Section shell ---------- */
+section{
+  position:relative; z-index:1;
+  min-height:100vh;
+  padding:140px 5vw 100px;
+  display:flex; flex-direction:column; justify-content:center;
+}
+.panel-id{
+  font-family:'JetBrains Mono',monospace; font-size:.7rem; color:var(--amber);
+  letter-spacing:.15em; display:flex; align-items:center; gap:10px; margin-bottom:18px;
+}
+.panel-id::before{content:'';width:24px;height:1px;background:var(--amber-dim);}
+.corner-marks{position:absolute; width:18px; height:18px; border-color:var(--cyan-dim); opacity:.6;}
+.corner-marks.tl{top:24px;left:24px;border-top:1px solid;border-left:1px solid;}
+.corner-marks.tr{top:24px;right:24px;border-top:1px solid;border-right:1px solid;}
+.corner-marks.bl{bottom:24px;left:24px;border-bottom:1px solid;border-left:1px solid;}
+.corner-marks.br{bottom:24px;right:24px;border-bottom:1px solid;border-right:1px solid;}
+
+h1,h2,h3{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:.01em; font-weight:700; line-height:1.05;}
+.reveal{opacity:0; transform:translateY(36px); transition:opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+/* ---------- HERO ---------- */
+#hero{padding-top:0; align-items:center;}
+.hero-grid{display:grid; grid-template-columns:1.3fr .9fr; gap:60px; align-items:center; width:100%; max-width:1300px; margin:0 auto;}
+.hero-eyebrow{font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--cyan); letter-spacing:.18em; margin-bottom:22px;}
+.hero h1{font-size:clamp(3rem,7vw,5.6rem); color:var(--paper);}
+.hero h1 span{color:var(--amber); display:block;}
+.hero p.role{font-family:'JetBrains Mono',monospace; margin-top:22px; font-size:1rem; color:var(--paper-dim); letter-spacing:.04em;}
+.hero-desc{margin-top:26px; max-width:520px; font-size:1.02rem; line-height:1.75; color:var(--paper-dim);}
+.hero-ctas{margin-top:42px; display:flex; gap:18px; flex-wrap:wrap;}
+.btn{
+  font-family:'JetBrains Mono',monospace; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+  padding:14px 26px; border-radius:2px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:10px;
+  transition:all .25s;
+}
+.btn-primary{background:var(--amber); color:var(--ink); border:1px solid var(--amber);}
+.btn-primary:hover{background:transparent; color:var(--amber);}
+.btn-ghost{border:1px solid var(--line-strong); color:var(--paper);}
+.btn-ghost:hover{border-color:var(--cyan); color:var(--cyan);}
+
+.id-card{
+  position:relative; background:var(--panel); border:1px solid var(--line-strong); border-radius:4px;
+  padding:28px; font-family:'JetBrains Mono',monospace;
+}
+.id-card .photo-wrap{
+  width:100%; aspect-ratio:1/1; border:1px solid var(--line-strong); overflow:hidden; margin-bottom:18px;
+  filter:grayscale(.2) contrast(1.05);
+  position:relative;
+}
+.id-card .photo-wrap img{width:100%;height:100%;object-fit:cover; display:block;}
+.id-card .photo-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(160deg, rgba(63,126,140,0.18), transparent 60%);}
+.id-row{display:flex; justify-content:space-between; font-size:.72rem; padding:7px 0; border-bottom:1px dashed var(--line);}
+.id-row span:first-child{color:var(--paper-dim); letter-spacing:.06em;}
+.id-row span:last-child{color:var(--paper); text-align:right;}
+.id-card .stamp{
+  position:absolute; top:18px; right:18px; border:1px solid var(--amber); color:var(--amber);
+  padding:3px 8px; font-size:.6rem; letter-spacing:.12em; transform:rotate(4deg); border-radius:2px;
+}
+.scroll-cue{position:absolute; bottom:34px; left:5vw; font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--paper-dim); letter-spacing:.1em; display:flex; align-items:center; gap:10px;}
+.scroll-cue .line{width:1px;height:34px;background:linear-gradient(var(--amber),transparent); animation:dropline 1.8s infinite;}
+@keyframes dropline{0%{opacity:0;transform:translateY(-8px)}50%{opacity:1}100%{opacity:0;transform:translateY(8px)}}
+
+/* ---------- SECTION HEADERS ---------- */
+.sec-head{display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px; margin-bottom:54px; border-bottom:1px solid var(--line); padding-bottom:24px;}
+.sec-head h2{font-size:clamp(2.1rem,4.2vw,3.4rem); color:var(--paper);}
+.sec-head .meta{font-family:'JetBrains Mono',monospace; font-size:.75rem; color:var(--paper-dim); text-align:right; line-height:1.6;}
+
+/* ---------- ABOUT ---------- */
+.about-wrap{display:grid; grid-template-columns:1fr 1fr; gap:70px; align-items:start;}
+.about-wrap p{font-size:1.08rem; line-height:1.85; color:var(--paper-dim); margin-bottom:20px;}
+.about-wrap strong{color:var(--paper); font-weight:600;}
+.stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line-strong); border:1px solid var(--line-strong); border-radius:4px; overflow:hidden;}
+.stat{background:var(--panel); padding:28px 22px;}
+.stat .num{font-family:'Oswald'; font-size:2.6rem; color:var(--amber); line-height:1;}
+.stat .lbl{font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--paper-dim); letter-spacing:.08em; margin-top:8px; text-transform:uppercase;}
+
+/* ---------- SKILLS ---------- */
+.skills-wrap{display:grid; grid-template-columns:1.1fr .9fr; gap:60px;}
+.skill-row{margin-bottom:22px;}
+.skill-top{display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:.78rem; margin-bottom:8px;}
+.skill-top span:first-child{color:var(--paper); letter-spacing:.02em;}
+.skill-top span:last-child{color:var(--cyan);}
+.skill-track{height:7px; background:var(--panel2); border:1px solid var(--line); border-radius:1px; position:relative; overflow:hidden;}
+.skill-fill{height:100%; width:0%; background:repeating-linear-gradient(135deg, var(--amber) 0 6px, var(--amber-dim) 6px 12px); transition:width 1.4s cubic-bezier(.16,1,.3,1);}
+.skill-track.ladder .skill-fill{background:linear-gradient(90deg,var(--cyan),var(--amber));}
+
+.softskill-list{display:flex; flex-direction:column; gap:0;}
+.softskill-list .item{display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid var(--line);}
+.softskill-list .idx{font-family:'JetBrains Mono',monospace; color:var(--amber-dim); font-size:.8rem; width:28px;}
+.softskill-list .item:hover .idx{color:var(--amber);}
+.softskill-list .name{font-family:'Oswald'; font-size:1.05rem; letter-spacing:.02em;}
+
+/* ---------- PROJECTS ---------- */
+.proj-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px;}
+.proj-card{
+  background:var(--panel); border:1px solid var(--line-strong); border-radius:4px; padding:30px;
+  position:relative; transition:transform .3s, border-color .3s, background .3s; overflow:hidden;
+}
+.proj-card::before{
+  content:''; position:absolute; top:0; left:0; width:3px; height:0%; background:var(--amber); transition:height .35s;
+}
+.proj-card:hover{transform:translateY(-6px); border-color:var(--cyan-dim); background:var(--panel2);}
+.proj-card:hover::before{height:100%;}
+.proj-tag{font-family:'JetBrains Mono',monospace; font-size:.66rem; color:var(--cyan); letter-spacing:.1em; margin-bottom:14px; display:block;}
+.proj-card h3{font-size:1.28rem; color:var(--paper); margin-bottom:12px; text-transform:none; letter-spacing:0;}
+.proj-card p{font-size:.92rem; color:var(--paper-dim); line-height:1.6;}
+.proj-id{position:absolute; top:24px; right:24px; font-family:'JetBrains Mono',monospace; font-size:.7rem; color:var(--line-strong);}
+
+/* ---------- EDUCATION / TIMELINE ---------- */
+.timeline{position:relative; padding-left:40px; border-left:1px dashed var(--line-strong);}
+.tl-item{position:relative; padding-bottom:50px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-item::before{content:''; position:absolute; left:-46px; top:4px; width:11px; height:11px; border-radius:50%; background:var(--ink); border:2px solid var(--amber);}
+.tl-year{font-family:'JetBrains Mono',monospace; font-size:.74rem; color:var(--amber); letter-spacing:.08em; margin-bottom:6px;}
+.tl-item h3{font-size:1.3rem; color:var(--paper); text-transform:none; margin-bottom:6px;}
+.tl-item .org{font-family:'JetBrains Mono',monospace; font-size:.82rem; color:var(--cyan); margin-bottom:8px;}
+.tl-item p{color:var(--paper-dim); font-size:.94rem; line-height:1.6; max-width:560px;}
+
+/* ---------- ACHIEVEMENTS ---------- */
+.ach-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-strong); border:1px solid var(--line-strong);}
+.ach-item{background:var(--panel); padding:30px 26px; min-height:170px; display:flex; flex-direction:column; justify-content:space-between; transition:background .3s;}
+.ach-item:hover{background:var(--panel2);}
+.ach-item .ach-no{font-family:'JetBrains Mono',monospace; color:var(--amber-dim); font-size:.75rem;}
+.ach-item p{color:var(--paper); font-size:.94rem; line-height:1.55; margin-top:14px;}
+
+/* ---------- CONTACT ---------- */
+#contact{align-items:center;}
+.contact-wrap{display:grid; grid-template-columns:1.1fr .9fr; gap:60px; width:100%;}
+.contact-wrap h2{font-size:clamp(2.4rem,5vw,4rem); color:var(--paper); margin-bottom:24px;}
+.contact-wrap p{color:var(--paper-dim); font-size:1.05rem; max-width:480px; line-height:1.7; margin-bottom:34px;}
+.contact-list{display:flex; flex-direction:column; gap:0;}
+.contact-list a, .contact-list .row{
+  display:flex; justify-content:space-between; align-items:center; padding:18px 0; border-bottom:1px solid var(--line);
+  color:var(--paper); text-decoration:none; font-family:'JetBrains Mono',monospace; font-size:.92rem;
+  transition:padding-left .25s, color .25s;
+}
+.contact-list a:hover{padding-left:10px; color:var(--amber);}
+.contact-list .lbl{color:var(--paper-dim); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;}
+
+footer{
+  position:relative; z-index:1; padding:30px 5vw; border-top:1px solid var(--line); display:flex; justify-content:space-between;
+  font-family:'JetBrains Mono',monospace; font-size:.7rem; color:var(--paper-dim); letter-spacing:.06em; flex-wrap:wrap; gap:10px;
+}
+
+/* responsive */
+@media(max-width:900px){
+  .hero-grid, .about-wrap, .skills-wrap, .contact-wrap{grid-template-columns:1fr;}
+  .proj-grid{grid-template-columns:1fr;}
+  .ach-grid{grid-template-columns:1fr;}
+  section{padding:120px 6vw 70px;}
+}
+@media(prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="blueprint-bg"></div>
+<div class="industrial-bg">
+  <!-- Gear 1: PLC/Mechatronics motif -->
+  <svg class="i-gear-1" viewBox="0 0 100 100"><g stroke-width="1.4">
+    <circle cx="50" cy="50" r="28"/><circle cx="50" cy="50" r="10"/>
+    <g>
+      <rect x="46" y="2" width="8" height="14"/><rect x="46" y="84" width="8" height="14"/>
+      <rect x="2" y="46" width="14" height="8"/><rect x="84" y="46" width="14" height="8"/>
+      <rect x="46" y="2" width="8" height="14" transform="rotate(45 50 50)"/>
+      <rect x="46" y="2" width="8" height="14" transform="rotate(90 50 50)"/>
+      <rect x="46" y="2" width="8" height="14" transform="rotate(135 50 50)"/>
+      <rect x="46" y="2" width="8" height="14" transform="rotate(180 50 50)"/>
+      <rect x="46" y="2" width="8" height="14" transform="rotate(225 50 50)"/>
+      <rect x="46" y="2" width="8" height="14" transform="rotate(270 50 50)"/>
+      <rect x="46" y="2" width="8" height="14" transform="rotate(315 50 50)"/>
+    </g>
+  </g></svg>
+
+  <!-- Gear 2: smaller mechanical gear -->
+  <svg class="i-gear-2 amber" viewBox="0 0 100 100"><g stroke-width="1.6">
+    <circle cx="50" cy="50" r="26"/><circle cx="50" cy="50" r="9"/>
+    <g>
+      <rect x="46" y="4" width="8" height="12"/><rect x="46" y="84" width="8" height="12"/>
+      <rect x="4" y="46" width="12" height="8"/><rect x="84" y="46" width="12" height="8"/>
+      <rect x="46" y="4" width="8" height="12" transform="rotate(60 50 50)"/>
+      <rect x="46" y="4" width="8" height="12" transform="rotate(120 50 50)"/>
+      <rect x="46" y="4" width="8" height="12" transform="rotate(180 50 50)"/>
+      <rect x="46" y="4" width="8" height="12" transform="rotate(240 50 50)"/>
+      <rect x="46" y="4" width="8" height="12" transform="rotate(300 50 50)"/>
+    </g>
+  </g></svg>
+
+  <svg class="i-gear-3" viewBox="0 0 100 100"><g stroke-width="2">
+    <circle cx="50" cy="50" r="24"/><circle cx="50" cy="50" r="8"/>
+    <rect x="46" y="6" width="8" height="12"/><rect x="46" y="82" width="8" height="12"/>
+    <rect x="6" y="46" width="12" height="8"/><rect x="82" y="46" width="12" height="8"/>
+  </g></svg>
+
+  <!-- Circuit board / PLC traces -->
+  <svg class="i-circuit" viewBox="0 0 300 200"><g stroke-width="1.2">
+    <path d="M10,20 H90 V60 H160"/><circle cx="160" cy="60" r="4"/>
+    <path d="M40,20 V100 H120 V160"/><circle cx="120" cy="160" r="4"/>
+    <path d="M200,10 V70 H260 V140"/><circle cx="260" cy="140" r="4"/>
+    <path d="M20,140 H80 V180"/><circle cx="20" cy="140" r="4"/>
+    <path d="M180,100 H230"/><rect x="230" y="90" width="20" height="20"/>
+    <rect x="90" y="50" width="14" height="14"/>
+    <rect x="0" y="0" width="300" height="200" stroke-dasharray="2 6" opacity="0.4"/>
+  </g></svg>
+
+  <!-- Antenna with radiating mmWave signal -->
+  <svg class="i-antenna" viewBox="0 0 200 200"><g stroke-width="1.5">
+    <line x1="100" y1="120" x2="100" y2="190"/>
+    <path d="M100,120 L70,40 M100,120 L130,40"/>
+    <line x1="70" y1="40" x2="130" y2="40"/>
+    <circle class="wave" cx="100" cy="40" r="20"/>
+    <circle class="wave wave2" cx="100" cy="40" r="35"/>
+    <circle class="wave wave3" cx="100" cy="40" r="50"/>
+  </g></svg>
+
+  <!-- Robotic arm -->
+  <svg class="i-robotarm" viewBox="0 0 260 160"><g stroke-width="1.6">
+    <rect x="10" y="120" width="50" height="20"/>
+    <line x1="35" y1="120" x2="35" y2="80"/>
+    <line x1="35" y1="80" x2="110" y2="55"/>
+    <circle cx="35" cy="80" r="6"/>
+    <line x1="110" y1="55" x2="170" y2="80"/>
+    <circle cx="110" cy="55" r="6"/>
+    <line x1="170" y1="80" x2="170" y2="40"/>
+    <circle cx="170" cy="80" r="5"/>
+    <path d="M160,30 L170,40 L180,30"/>
+    <path d="M158,40 L170,52 L182,40"/>
+  </g></svg>
+
+  <!-- CNC spindle / mill bit -->
+  <svg class="i-cnc" viewBox="0 0 160 200"><g stroke-width="1.4">
+    <rect x="60" y="6" width="40" height="50"/>
+    <line x1="80" y1="56" x2="80" y2="120"/>
+    <path d="M68,120 L80,160 L92,120 Z"/>
+    <line x1="20" y1="170" x2="140" y2="170"/>
+    <line x1="20" y1="180" x2="140" y2="180"/>
+    <circle cx="80" cy="30" r="4" stroke-dasharray="1 4"/>
+  </g></svg>
+
+  <!-- Conveyor with sorted parts -->
+  <svg class="i-conveyor" viewBox="0 0 300 80"><g stroke-width="1.4">
+    <line x1="0" y1="60" x2="300" y2="60"/>
+    <line x1="0" y1="70" x2="300" y2="70"/>
+    <circle cx="20" cy="65" r="6"/><circle cx="60" cy="65" r="6"/><circle cx="100" cy="65" r="6"/>
+    <circle cx="200" cy="65" r="6"/><circle cx="240" cy="65" r="6"/><circle cx="280" cy="65" r="6"/>
+    <rect x="130" y="20" width="18" height="18"/>
+    <rect x="160" y="30" width="14" height="14"/>
+    <circle cx="190" cy="32" r="8"/>
+  </g></svg>
+
+  <!-- PLC I/O grid -->
+  <svg class="i-plcgrid" viewBox="0 0 160 100"><g stroke-width="1.2">
+    <rect x="10" y="10" width="140" height="80"/>
+    <line x1="10" y1="30" x2="150" y2="30"/>
+    <circle cx="25" cy="50" r="4"/><circle cx="45" cy="50" r="4"/><circle cx="65" cy="50" r="4"/>
+    <circle cx="85" cy="50" r="4"/><circle cx="105" cy="50" r="4"/><circle cx="125" cy="50" r="4"/>
+    <circle cx="25" cy="70" r="4"/><circle cx="45" cy="70" r="4"/><circle cx="65" cy="70" r="4"/>
+    <circle cx="85" cy="70" r="4"/><circle cx="105" cy="70" r="4"/><circle cx="125" cy="70" r="4"/>
+  </g></svg>
+</div>
+<div class="gauge" id="gauge"></div>
+<div class="gauge-label"><span class="dot"></span> SYSTEM ONLINE</div>
+
+<nav>
+  <div class="logo">M. SAI KRISHNA <span class="tag">MECHATRONICS</span></div>
+  <div class="navlinks">
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#education">Education</a>
+    <a href="#achievements">Achievements</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow reveal">// JUNIOR MECHATRONICS &amp; INDUSTRIAL AUTOMATION ENGINEER</div>
+      <h1 class="reveal">BUILDING THE<span>MACHINES THAT BUILD.</span></h1>
+      <p class="role reveal">PLC · SCADA · ROBOTICS · IoT · ANTENNA SYSTEMS</p>
+      <p class="hero-desc reveal">Final-year B.Tech (ECE) student and Diploma topper in Advanced Mechatronics &amp; Industrial Automation. I design, wire, and program the systems on the factory floor — from pneumatic sorting lines to IoT-enabled sensor networks — and train the next batch of engineers along the way.</p>
+      <div class="hero-ctas reveal">
+        <a href="#projects" class="btn btn-primary">View Project Log →</a>
+        <a href="#contact" class="btn btn-ghost">Get In Touch</a>
+      </div>
+    </div>
+    <div class="id-card reveal">
+      <div class="stamp">VERIFIED</div>
+      <div class="photo-wrap"><img src="photo.jpg" alt="Masavarapu Sai Krishna" onerror="this.parentElement.style.background='linear-gradient(135deg,#1b1f21,#0b0d0e)'; this.remove();"></div>
+      <div class="id-row"><span>UNIT</span><span>MASAVARAPU SAI KRISHNA</span></div>
+      <div class="id-row"><span>ROLE</span><span>JR. MECHATRONICS ENGINEER</span></div>
+      <div class="id-row"><span>BASE</span><span>VISAKHAPATNAM, AP, IN</span></div>
+      <div class="id-row"><span>STATUS</span><span style="color:var(--amber);">FINAL YEAR B.TECH</span></div>
+      <div class="id-row"><span>DOB</span><span>20 / 12 / 2005</span></div>
+      <div class="id-row" style="border-bottom:none;"><span>CONTACT</span><span>8309320300</span></div>
+    </div>
+  </div>
+  <div class="scroll-cue"><div class="line"></div>SCROLL TO INSPECT</div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="corner-marks tl"></div><div class="corner-marks tr"></div>
+  <div class="sec-head reveal">
+    <div>
+      <div class="panel-id">SPEC-01 / PROFILE</div>
+      <h2>ABOUT THE UNIT</h2>
+    </div>
+    <div class="meta">CLASS: STUDENT ENGINEER<br>FIELD: INDUSTRIAL AUTOMATION</div>
+  </div>
+  <div class="about-wrap">
+    <div class="reveal">
+      <p>I'm <strong>Sai Krishna</strong>, a Junior Mechatronics &amp; Industrial Automation Engineer currently finishing my B.Tech in Electronics &amp; Communication at Vignan's Institute of Information and Technology, Duvvada. My background runs through both sides of automation — the electrical logic of PLCs and SCADA, and the physical mechanics of hydraulics, pneumatics, and CNC machining.</p>
+      <p>I topped my Mechatronics diploma batch at the MSME Technology Centre, Vizag with <strong>92.92%</strong>, and have spent two internship years not just learning the floor — but teaching it, training students and working professionals at the Skill Development Institute of India (SDI).</p>
+      <p>My objective is simple: get more hands-on time with real industrial equipment, and put that experience directly to work growing the systems — and companies — I'm part of.</p>
+    </div>
+    <div class="stat-grid reveal">
+      <div class="stat"><div class="num">92.92%</div><div class="lbl">Diploma Mechatronics Score</div></div>
+      <div class="stat"><div class="num">8+</div><div class="lbl">Engineering Projects Built</div></div>
+      <div class="stat"><div class="num">2nd yr Internship</div><div class="lbl">Trainer @ SDI Vizag</div></div>
+      <div class="stat"><div class="num">2024</div><div class="lbl">B.Tech ECE — Final Year</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="corner-marks tl"></div><div class="corner-marks tr"></div>
+  <div class="sec-head reveal">
+    <div>
+      <div class="panel-id">SPEC-02 / CAPABILITIES</div>
+      <h2>SKILL SCHEMATIC</h2>
+    </div>
+    <div class="meta">HARD SKILLS: FIELD &amp; SOFTWARE<br>SOFT SKILLS: OPERATING PROTOCOL</div>
+  </div>
+  <div class="skills-wrap">
+    <div class="reveal" id="skillBars">
+      <div class="skill-row"><div class="skill-top"><span>PLC Programming &amp; SCADA</span><span>95%</span></div><div class="skill-track ladder"><div class="skill-fill" data-w="95"></div></div></div>
+      <div class="skill-row"><div class="skill-top"><span>TIA Portal &amp; TIA SIM</span><span>92%</span></div><div class="skill-track ladder"><div class="skill-fill" data-w="92"></div></div></div>
+      <div class="skill-row"><div class="skill-top"><span>Hydraulics &amp; Pneumatics</span><span>90%</span></div><div class="skill-track"><div class="skill-fill" data-w="90"></div></div></div>
+      <div class="skill-row"><div class="skill-top"><span>Industrial IoT</span><span>90%</span></div><div class="skill-track ladder"><div class="skill-fill" data-w="90"></div></div></div>
+      <div class="skill-row"><div class="skill-top"><span>Antenna Design — HFSS</span><span>85%</span></div><div class="skill-track"><div class="skill-fill" data-w="85"></div></div></div>
+      <div class="skill-row"><div class="skill-top"><span>CNC Turning &amp; Milling Ops</span><span>85%</span></div><div class="skill-track"><div class="skill-fill" data-w="85"></div></div></div>
+      <div class="skill-row"><div class="skill-top"><span>Microprocessors &amp; Microcontrollers</span><span>88%</span></div><div class="skill-track ladder"><div class="skill-fill" data-w="88"></div></div></div>
+      <div class="skill-row"><div class="skill-top"><span>AutoCAD &amp; SolidWorks</span><span>80%</span></div><div class="skill-track"><div class="skill-fill" data-w="80"></div></div></div>
+      <div class="skill-row"><div class="skill-top"><span>Python &amp; C — Basics</span><span>70%</span></div><div class="skill-track"><div class="skill-fill" data-w="70"></div></div></div>
+      <div class="skill-row"><div class="skill-top"><span>VHDL Coding — Basics</span><span>65%</span></div><div class="skill-track"><div class="skill-fill" data-w="65"></div></div></div>
+    </div>
+    <div class="reveal">
+      <div class="panel-id" style="margin-bottom:20px;">OPERATING PROTOCOL</div>
+      <div class="softskill-list">
+        <div class="item"><span class="idx">01</span><span class="name">Time Management</span></div>
+        <div class="item"><span class="idx">02</span><span class="name">Teaching Skill (Knowledge Transfer)</span></div>
+        <div class="item"><span class="idx">03</span><span class="name">Leadership Skill</span></div>
+        <div class="item"><span class="idx">04</span><span class="name">Organizing Skill</span></div>
+        <div class="item"><span class="idx">05</span><span class="name">Strong Work Dedication</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="corner-marks tl"></div><div class="corner-marks tr"></div>
+  <div class="sec-head reveal">
+    <div>
+      <div class="panel-id">SPEC-03 / BUILD LOG</div>
+      <h2>PROJECT WORK</h2>
+    </div>
+    <div class="meta">8 UNITS DOCUMENTED<br>STATUS: ALL OPERATIONAL</div>
+  </div>
+  <div class="proj-grid">
+    <div class="proj-card reveal"><span class="proj-id">UNIT-01</span><span class="proj-tag">PLC · SCADA · PNEUMATICS</span><h3>Automated Material Classification System</h3><p>A conveyor-fed sorting machine with three selectable modules — metal, color, and volume — run from a single HMI panel. Inductive, TCS230 color, and optical sensors feed a Siemens S7-1200 PLC programmed in TIA Portal V17.1, which fires pneumatic double-acting cylinders to route each object into its basket.</p></div>
+    <div class="proj-card reveal"><span class="proj-id">UNIT-02</span><span class="proj-tag">PLC · HYDRAULICS · RECYCLING</span><h3>Modular Plastic Moulding System</h3><p>A cyclic moulding rig for recycled thermoplastics: an induction-heated chamber melts material for gravity-fed discharge into travelling mould boxes, where a PLC-synchronized hydraulic press compresses the cooling semi-solid charge — running fill, cool, and press stages in parallel without pre-pelletization.</p></div>
+    <div class="proj-card reveal"><span class="proj-id">UNIT-03</span><span class="proj-tag">IoT · ESP32-CAM · OCR</span><h3>Number Plate Recognition &amp; Register System</h3><p>A push-button ESP32-CAM captures a plate image, runs it through cloud OCR, and logs the result to Firebase in real time — shown on an OLED and a live website. Field-tested on five institute buses for fully automated entry/exit register-keeping.</p></div>
+    <div class="proj-card reveal"><span class="proj-id">UNIT-04</span><span class="proj-tag">IoT · RASPBERRY PI PICO W</span><h3>Smart Fluid Analyzer for Industries</h3><p>An end-to-end fluid diagnostics platform reading temperature, TDS, turbidity, gas signature, color, UV-fluorescence, and pH, then classifying the sample into one of twenty categories on a live dashboard. Hit 100% classification accuracy across 8 fluids at under ₹3,000 in parts and zero hosting cost.</p></div>
+    <div class="proj-card reveal"><span class="proj-id">UNIT-05</span><span class="proj-tag">IoT · ESP32-CAM · BIOMETRICS</span><h3>Smart Hostel Mess Entrance Monitor</h3><p>A face-recognition entry system for hostel mess halls using ESP32-CAM and InsightFace cosine-similarity matching, with tiered daily-entry limits for staff, residents, and day scholars and automatic buzzer alerts on membership expiry — fully containerized on a cloud backend.</p></div>
+    <div class="proj-card reveal"><span class="proj-id">UNIT-06</span><span class="proj-tag">ARDUINO · SOLIDWORKS</span><h3>Smart Object Sorting System</h3><p>A low-cost Arduino Uno sorter combining IR, inductive, raindrop, and TCS230 color sensors with stepper and servo motors to classify objects by material and color — prototyped first in SolidWorks, with HMI/SCADA added via TIA Portal V17 for industrial-grade communication.</p></div>
+    <div class="proj-card reveal"><span class="proj-id">UNIT-07</span><span class="proj-tag">HFSS · 5G · ML</span><h3>Dual-Band 5G mmWave Antenna (n260/n261)</h3><p>A compact circular microstrip patch antenna on Rogers RO3003 substrate covering the 28/38 GHz bands, achieving 6.38/5.8 dB gain and 80–88% radiation efficiency, with ML-assisted optimization of return loss and bandwidth in HFSS.</p></div>
+    <div class="proj-card reveal"><span class="proj-id">UNIT-08</span><span class="proj-tag">HFSS · 5G · RF DESIGN</span><h3>5G mmWave Antenna — n258 Band</h3><p>A slotted microstrip patch antenna at 25.5 GHz on Rogers RT5880 substrate, with slot-loading to widen bandwidth and stabilize radiation pattern — simulated to a 7.4 dBi peak gain, &gt;85% efficiency, and below −18 dB reflection coefficient.</p></div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="corner-marks tl"></div><div class="corner-marks tr"></div>
+  <div class="sec-head reveal">
+    <div>
+      <div class="panel-id">SPEC-04 / TRAINING RECORD</div>
+      <h2>EDUCATION TIMELINE</h2>
+    </div>
+    <div class="meta">CHRONOLOGICAL LOG<br>2018 → 2024</div>
+  </div>
+  <div class="timeline reveal">
+    <div class="tl-item">
+      <div class="tl-year">COMPLETED 2024</div>
+      <h3>B.Tech, Electronics &amp; Communication Engineering</h3>
+      <div class="org">Vignan's Institute of Information and Technology, Duvvada, VSKP</div>
+      <p>Final-year coursework spanning microprocessors, antenna design, and embedded systems — bridging core electronics with industrial application.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">2021 – 2024 · TOPPER OF BATCH</div>
+      <h3>Diploma in Advanced Mechatronics &amp; Industrial Automation</h3>
+      <div class="org">MSME Technology Center, Visakhapatnam</div>
+      <p>Secured top marks of the batch with <strong style="color:var(--paper);">92.92%</strong>; served as batch representative across the diploma program.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">10TH CLASS · ICSE</div>
+      <h3>Secondary Education — 91%</h3>
+      <div class="org">De Paul School, Ukkunagaram, Sector 8, Visakhapatnam</div>
+      <p>Completed ICSE syllabus with a 91% aggregate, laying the foundation for technical study.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ACHIEVEMENTS -->
+<section id="achievements">
+  <div class="corner-marks tl"></div><div class="corner-marks tr"></div>
+  <div class="sec-head reveal">
+    <div>
+      <div class="panel-id">SPEC-05 / PERFORMANCE LOG</div>
+      <h2>ACHIEVEMENTS &amp; CERTS</h2>
+    </div>
+    <div class="meta">VERIFIED RECORDS<br>2022 — 2024</div>
+  </div>
+  <div class="ach-grid reveal">
+    <div class="ach-item"><span class="ach-no">A.01</span><p>1st Prize — Technical Presentation, Techno Sparkle 2K24, conducted by MSME.</p></div>
+    <div class="ach-item"><span class="ach-no">A.02</span><p>Topper of Batch (2021–24) in Mechatronics during Diploma; appointed batch representative.</p></div>
+    <div class="ach-item"><span class="ach-no">A.03</span><p>Certified by Microsoft &amp; EY Greenskills in Sustainability, Entrepreneurship &amp; Employment Skills.</p></div>
+    <div class="ach-item"><span class="ach-no">A.04</span><p>Trained students &amp; working professionals at Skill Development Institute of India (SDI), VSKP — 2nd year internship.</p></div>
+    <div class="ach-item"><span class="ach-no">A.05</span><p>Conducted an IoT workshop for final-year degree students during 3rd year of B.Tech.</p></div>
+    <div class="ach-item"><span class="ach-no">A.06</span><p>Prize-winner — Science Day Debate, 2022.</p></div>
+    <div class="ach-item"><span class="ach-no">A.07</span><p>Prize-winner — Modern Innovative Ideas Presentation.</p></div>
+    <div class="ach-item"><span class="ach-no">A.08</span><p>Built and documented 8 independent engineering projects spanning PLC, IoT, robotics &amp; RF systems.</p></div>
+    <div class="ach-item"><span class="ach-no">A.09</span><p>Maintains hands-on fluency across CNC, HFSS, TIA Portal, and CAD toolchains — rare cross-domain range for student level.</p></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="corner-marks tl"></div><div class="corner-marks tr"></div>
+  <div class="contact-wrap">
+    <div class="reveal">
+      <div class="panel-id">SPEC-06 / CONNECT</div>
+      <h2>LET'S BUILD<br>SOMETHING<br>THAT RUNS.</h2>
+      <p>Open to internships, apprenticeships, and on-field roles in industrial automation, mechatronics, and embedded systems. If you need someone who's equally comfortable in a control cabinet and a classroom — reach out.</p>
+      <a href="mailto:saikrishnamsk9502@gmail.com" class="btn btn-primary">Send an Email →</a>
+    </div>
+    <div class="reveal">
+      <div class="contact-list">
+        <a href="mailto:saikrishnamsk9502@gmail.com"><span><span class="lbl">Email</span><br>saikrishnamsk9502@gmail.com</span><span>→</span></a>
+        <a href="tel:+918309320300"><span><span class="lbl">Phone</span><br>+91 83093 20300</span><span>→</span></a>
+        <div class="row"><span><span class="lbl">Location</span><br>Vennelapalem, Paravada, Anakapalli, Visakhapatnam, AP 531021</span><span>📍</span></div>
+        <div class="row"><span><span class="lbl">Status</span><br>Final Year B.Tech · Open to Opportunities</span><span style="color:var(--amber);">●</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 MASAVARAPU SAI KRISHNA — INDUSTRIAL AUTOMATION ENGINEER</span>
+  <span>BUILT WITH PRECISION · ALL SYSTEMS NOMINAL</span>
+</footer>
+
+<script>
+// scroll progress gauge
+const gauge = document.getElementById('gauge');
+function updateGauge(){
+  const h = document.documentElement;
+  const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  gauge.style.width = scrolled + '%';
+}
+document.addEventListener('scroll', updateGauge);
+
+// reveal on scroll
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('in'); }
+  });
+},{threshold:0.15});
+revealEls.forEach(el=>io.observe(el));
+
+// skill bars fill on view
+const skillSection = document.getElementById('skills');
+const skillIO = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      document.querySelectorAll('.skill-fill').forEach(f=>{
+        f.style.width = f.getAttribute('data-w') + '%';
+      });
+      skillIO.disconnect();
+    }
+  });
+},{threshold:0.3});
+skillIO.observe(skillSection);
+</script>
+</body>
+</html>
